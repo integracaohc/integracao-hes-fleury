@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    networks:
+      - rabbitmq_net
+    volumes:
+      - ./rabbitmq-init:/docker-entrypoint-init.d
+
+  integracao-hes-fleury:
+    build: .
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_net
+    ports:
+      - "2000:2000"
+    volumes:
+      - ./logs:/app/logs
+
+networks:
+  rabbitmq_net:
+    driver: bridge
