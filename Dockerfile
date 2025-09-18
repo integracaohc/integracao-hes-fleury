@@ -8,7 +8,10 @@ COPY "main.go" .
 COPY "configIntegracao.go" .
 COPY "functions/" functions/
 COPY "utils/" utils/
+COPY "mail/" mail/
 COPY logs/ app/logs/
+COPY ".env" .
+COPY "db/" db
 RUN go mod init integracao-hes-fleury && go mod tidy && go build -o integracao-hes-fleury
 
 #RUN go mod init integracao-hes-fleury && go mod tidy && go build -o integracao-hes-fleury main.go
@@ -27,6 +30,7 @@ COPY --from=builder /etc/ld.so.conf.d/oracle-instantclient.conf /etc/ld.so.conf.
 
 ENV LD_LIBRARY_PATH=/usr/lib/oracle/19.3/client64/lib:$LD_LIBRARY_PATH
 
+COPY --from=builder /app/.env .
 
 COPY --from=builder /app/integracao-hes-fleury .
 COPY wait-for-it.sh /wait-for-it.sh

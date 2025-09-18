@@ -5,14 +5,14 @@ import "log"
 type StatusLog string
 
 const (
-	ErroGeral         StatusLog = "<0>"
-	ErroBanco         StatusLog = "<1>"
-	ErroConexao       StatusLog = "<2>"
-	Debug             StatusLog = "<3>"
-	ErroBarramento    StatusLog = "<4>"
-	SucessoBarramento StatusLog = "<5>"
-	ErroIntegracao    StatusLog = "<6>"
-	SucessoIntegracao StatusLog = "<7>"
+	ErroGeral      StatusLog = "<0>"
+	ErroBanco      StatusLog = "<1>"
+	ErroConexao    StatusLog = "<2>"
+	Debug          StatusLog = "<3>"
+	ErroFleury     StatusLog = "<4>"
+	SucessoFleury  StatusLog = "<5>"
+	ErroIntegracao StatusLog = "<6>"
+	Sucesso        StatusLog = "<7>"
 )
 
 func LogMonitor(status StatusLog, ih string, mensagem string) {
@@ -36,13 +36,13 @@ func LogMonitor(status StatusLog, ih string, mensagem string) {
 		statusLog = "<2>"
 	case Debug: // debug
 		statusLog = "<3>"
-	case ErroBarramento: // erroStatus
+	case ErroFleury: // erroStatus
 		statusLog = "<4>"
-	case SucessoBarramento: // sucessoStatus
+	case SucessoFleury: // sucessoStatus
 		statusLog = "<5>"
 	case ErroIntegracao: // erroStatus
 		statusLog = "<6>"
-	case SucessoIntegracao: // sucessoStatus
+	case Sucesso: // sucessoStatus
 		statusLog = "<7>"
 	}
 	log.Println(statusLog + " " + ih + " " + mensagem)

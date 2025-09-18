@@ -1,9 +1,7 @@
-version: "3.9"
-
 services:
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq
+    container_name: rabbitmq-hes-fleury
     ports:
       - "5672:5672"   # AMQP
       - "15672:15672" # Management UI
@@ -16,6 +14,10 @@ services:
       - ./rabbitmq-init:/docker-entrypoint-init.d
 
   integracao-hes-fleury:
+    container_name: integracao-hes-fleury
+    image: integracao-hes-fleury:1.0
+    env_file:
+      - .env
     build: .
     depends_on:
       - rabbitmq

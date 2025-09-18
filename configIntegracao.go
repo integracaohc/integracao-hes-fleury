@@ -21,7 +21,7 @@ func setupControle() {
 
 	//functions.Producer()
 
-	go runScheduler(time.Tuesday, "15:00:00")
+	go runScheduler(time.Wednesday, "17:00:00")
 
 }
 
@@ -79,7 +79,7 @@ func AuthMiddleware(expectedID, expectedSecret string) gin.HandlerFunc {
 		clientID := c.GetHeader("client_id")
 		clientSecret := c.GetHeader("client_secret")
 
-		if clientID != expectedID || clientSecret != expectedSecret {
+		if clientID != expectedID || clientSecret != expectedSecret || clientID == "" || clientSecret == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"sucesso": false,
 				"message": "unauthorized",
@@ -96,11 +96,13 @@ func setupRouter() *gin.Engine {
 	r := gin.Default()
 	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 
-	clientID := os.Getenv("client_id_ws")
-	clientSecret := os.Getenv("client_secret_ws")
+	clientID := os.Getenv("client_id")
+	clientSecret := os.Getenv("client_secret")
 
 	r.GET("/check-status", AuthMiddleware(clientID, clientSecret), checkStatus())
-	r.POST("/produtos-fleury/:produto", AuthMiddleware(clientID, clientSecret), functions.ProdutosFleury())
+	r.GET("/produtos-fleury/:produto", AuthMiddleware(clientID, clientSecret), functions.ProdutosFleury())
+	r.GET("/produtos-fleury/todos", AuthMiddleware(clientID, clientSecret), functions.ProcessaProdutosFleury())
+
 	r.NoRoute(AuthMiddleware(clientID, clientSecret), NotFound())
 
 	return r
