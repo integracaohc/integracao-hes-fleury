@@ -79,8 +79,8 @@ func Producer() {
 	}
 
 	// 3. Buscar registros no banco
-	//rows, err := db.Query("select CD_DEPARA_INTEGRA from mvintegra.depara where cd_sistema_integra like '%FLEURY%'")
-	rows, err := db.Query("select CD_DEPARA_INTEGRA from mvintegra.depara where cd_sistema_integra like '%OPMENEXO%' order by CD_DEPARA_INTEGRA FETCH FIRST 10 ROWS ONLY")
+	rows, err := db.Query("select CD_DEPARA_INTEGRA from mvintegra.depara where cd_sistema_integra like '%FLEURY%'")
+	//rows, err := db.Query("select CD_DEPARA_INTEGRA from mvintegra.depara where cd_sistema_integra like '%OPMENEXO%' order by CD_DEPARA_INTEGRA FETCH FIRST 10 ROWS ONLY")
 	if err != nil {
 		//log.Println("Erro ao buscar registros no banco: " + err.Error())
 		utils.LogMonitor(utils.ErroBanco, label, "Erro ao buscar registros no banco: "+err.Error())

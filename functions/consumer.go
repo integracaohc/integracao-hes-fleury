@@ -140,8 +140,8 @@ func Consumer() {
 					continue
 				}
 
-				if instrucaoFleury.IdProduto == "" || instrucaoFleury.TextoInstrucao == "" {
-					utils.LogMonitor(utils.ErroFleury, label, "Produto nao encontrado no Fleury")
+				if instrucaoFleury.IdProduto == "" {
+					utils.LogMonitor(utils.ErroFleury, label, "Produto "+cdDepara.CD_DEPARA_INTEGRA+" nao encontrado no Fleury")
 					listaProdutosSemInstrucao = append(listaProdutosSemInstrucao, ERROS_INTEGRA{
 						CD_DEPARA_INTEGRA: cdDepara.CD_DEPARA_INTEGRA,
 						ERROS:             "Produto nao encontrado no Fleury",
@@ -149,8 +149,17 @@ func Consumer() {
 					continue
 				}
 
+				if instrucaoFleury.TextoInstrucao == "" {
+					utils.LogMonitor(utils.ErroFleury, label, "Produto "+cdDepara.CD_DEPARA_INTEGRA+" sem instrução no Fleury")
+					listaProdutosSemInstrucao = append(listaProdutosSemInstrucao, ERROS_INTEGRA{
+						CD_DEPARA_INTEGRA: cdDepara.CD_DEPARA_INTEGRA,
+						ERROS:             "Produto sem instrução no Fleury",
+					})
+					continue
+				}
+
 				if err := procedureMV(instrucaoFleury); err != nil {
-					utils.LogMonitor(utils.ErroIntegracao, label, "Erro ao executar procedure: "+err.Error())
+					utils.LogMonitor(utils.ErroIntegracao, label, "Erro ao executar procedure para produto: "+cdDepara.CD_DEPARA_INTEGRA+" - "+err.Error())
 					listaProdutosErros = append(listaProdutosErros, ERROS_INTEGRA{
 						CD_DEPARA_INTEGRA: cdDepara.CD_DEPARA_INTEGRA,
 						ERROS:             "Erro ao executar procedure: " + err.Error(),
