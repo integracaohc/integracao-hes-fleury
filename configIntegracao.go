@@ -102,7 +102,7 @@ func setupRouter() *gin.Engine {
 	r.GET("/check-status", AuthMiddleware(clientID, clientSecret), checkStatus())
 	r.GET("/produtos-fleury/:produto", AuthMiddleware(clientID, clientSecret), functions.ProdutosFleury())
 	r.GET("/produtos-fleury/todos", AuthMiddleware(clientID, clientSecret), functions.ProcessaProdutosFleury())
-
+	r.GET("/gera-pdf/:ficha", AuthMiddleware(clientID, clientSecret), functions.GeraPDF())
 	r.NoRoute(AuthMiddleware(clientID, clientSecret), NotFound())
 
 	return r
