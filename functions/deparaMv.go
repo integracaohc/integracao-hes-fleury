@@ -40,9 +40,9 @@ func DeparaMV() gin.HandlerFunc {
 		}
 		utils.LogMonitor(utils.Debug, label, "Depara Fleury: "+cdDeparaFleury.CD_DEPARA_INTEGRA)
 		c.JSON(http.StatusOK, gin.H{
-			"sucesso":      true,
-			"deparaMV":     depara,
-			"deparaFleury": cdDeparaFleury.CD_DEPARA_INTEGRA,
+			"sucesso":        true,
+			"cdDeparaMV":     depara,
+			"cdDeparaFleury": cdDeparaFleury.CD_DEPARA_INTEGRA,
 		})
 	}
 	return gin.HandlerFunc(fn)
