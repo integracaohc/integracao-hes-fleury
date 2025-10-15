@@ -14,11 +14,13 @@ import (
 )
 
 type DEPARA_INTEGRA struct {
+	CD_DEPARA_MV      string `json:"cd_depara_mv"`
 	CD_DEPARA_INTEGRA string `json:"cd_depara_integra"`
 	REPETICOES_FILA   int    `json:"repeticoes_fila"`
 }
 
 type ERROS_INTEGRA struct {
+	CD_DEPARA_MV      string `json:"cd_depara_mv"`
 	CD_DEPARA_INTEGRA string `json:"cd_depara_integra"`
 	ERROS             string `json:"erros"`
 }
@@ -79,7 +81,7 @@ func Producer() {
 	}
 
 	// 3. Buscar registros no banco
-	rows, err := db.Query("select CD_DEPARA_INTEGRA from mvintegra.depara where cd_sistema_integra like '%FLEURY%'")
+	rows, err := db.Query("select CD_DEPARA_MV, CD_DEPARA_INTEGRA from mvintegra.depara where cd_sistema_integra like '%FLEURY%'")
 	//rows, err := db.Query("select CD_DEPARA_INTEGRA from mvintegra.depara where cd_sistema_integra like '%OPMENEXO%' order by CD_DEPARA_INTEGRA FETCH FIRST 10 ROWS ONLY")
 	if err != nil {
 		//log.Println("Erro ao buscar registros no banco: " + err.Error())
@@ -90,7 +92,7 @@ func Producer() {
 
 	for rows.Next() {
 		var depara DEPARA_INTEGRA
-		if err := rows.Scan(&depara.CD_DEPARA_INTEGRA); err != nil {
+		if err := rows.Scan(&depara.CD_DEPARA_MV, &depara.CD_DEPARA_INTEGRA); err != nil {
 			//log.Println("Erro ao ler linha:", err)
 			utils.LogMonitor(utils.ErroGeral, label, "Erro ao ler linha: "+err.Error())
 			continue

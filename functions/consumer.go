@@ -146,18 +146,20 @@ func Consumer() {
 					utils.LogMonitor(utils.ErroFleury, label, "Erro ao acessar Fleury: "+err.Error())
 					if cdDepara.REPETICOES_FILA > 3 {
 						listaProdutosErros = append(listaProdutosErros, ERROS_INTEGRA{
+							CD_DEPARA_MV:      cdDepara.CD_DEPARA_MV,
 							CD_DEPARA_INTEGRA: cdDepara.CD_DEPARA_INTEGRA,
 							ERROS:             "Erro ao acessar Fleury: " + err.Error(),
 						})
 					}
 					continue
 				}
-				erroProcedure := buscaProcessaInstrucao(cdDepara.CD_DEPARA_INTEGRA, accessToken)
+				erroProcedure := buscaProcessaInstrucao(cdDepara.CD_DEPARA_MV, cdDepara.CD_DEPARA_INTEGRA, accessToken)
 
 				if erroProcedure != "" {
 					utils.LogMonitor(utils.ErroFleury, label, "Erro ao processar instrucao: "+erroProcedure)
 					if cdDepara.REPETICOES_FILA > 3 {
 						listaProdutosErros = append(listaProdutosErros, ERROS_INTEGRA{
+							CD_DEPARA_MV:      cdDepara.CD_DEPARA_MV,
 							CD_DEPARA_INTEGRA: cdDepara.CD_DEPARA_INTEGRA,
 							ERROS:             "Erro ao processar instrucao: " + erroProcedure,
 						})
@@ -325,9 +327,9 @@ func acessoFleury() (string, error) {
 
 }
 
-func buscaProcessaInstrucao(produto string, accessToken string) string {
+func buscaProcessaInstrucao(produtoMV string, produtoFleury string, accessToken string) string {
 	label := "BuscaProcessaInstrucao"
-	url := os.Getenv("FLEURY_URL") + `/instrucoes-gerais-hospitais/v1/produtos?produtos=` + produto
+	url := os.Getenv("FLEURY_URL") + `/instrucoes-gerais-hospitais/v1/produtos?produtos=` + produtoFleury
 	method := "GET"
 
 	client := &http.Client{}
@@ -371,9 +373,10 @@ func buscaProcessaInstrucao(produto string, accessToken string) string {
 	//fmt.Println("idProduto:", result[0]["idProduto"])
 	instrucoes := result[0]["instrucoesGerais"].([]interface{})
 	var instrucoesMV INSTRUCAO_FLEURY_MV
-	instrucoesMV.IdProduto = produto
+	instrucoesMV.IdProduto = produtoMV
 
 	erroProcedure := ""
+	instrucaoFleury := ""
 
 	for _, i := range instrucoes {
 
@@ -382,15 +385,48 @@ func buscaProcessaInstrucao(produto string, accessToken string) string {
 		// if instrucao["idInstrucaoGeral"] != float64(6) {
 		// 	continue
 		// }
-		instrucoesMV.TextoInstrucao = instrucao["textoInstrucao"].(string)
+		nomeInstrucaoGeral := instrucao["nomeInstrucaoGeral"].(string)
+		instrucoesMV.TextoInstrucao = nomeInstrucaoGeral + " \n " + instrucao["textoInstrucao"].(string)
 		instrucoesMV.IdInstrucaoGeral = strconv.Itoa(int(instrucao["idInstrucaoGeral"].(float64)))
 		//fmt.Println("idInstrucaoGeral:", instrucao["idInstrucaoGeral"])
 		//fmt.Println("textoInstrucao:", instrucao["textoInstrucao"])
 
-		utils.LogMonitor(utils.Debug, label, "IdProduto: "+produto)
+		//fmt.Println(instrucao["instrucoesFilho"])
+		if instrucao["instrucoesFilho"] != nil {
+			for _, i := range instrucao["instrucoesFilho"].([]interface{}) {
+				instrucaoFilho := i.(map[string]interface{})
+				//fmt.Println(instrucaoFilho)
+				nomeInstrucaoFilho := instrucaoFilho["nomeInstrucaoGeralFilho"].(string)
+				textoInstrucaoFilho := instrucaoFilho["textoInstrucaoFilho"].(string)
+				//fmt.Println(nomeInstrucaoFilho)
+				//fmt.Println(textoInstrucaoFilho)
+				instrucoesMV.TextoInstrucao += "\n" + nomeInstrucaoFilho + "\n" + textoInstrucaoFilho
+			}
+		}
+
+		utils.LogMonitor(utils.Debug, label, "IdProduto: "+produtoMV)
 		utils.LogMonitor(utils.Debug, label, "TextoInstrucao: "+instrucoesMV.TextoInstrucao)
 		utils.LogMonitor(utils.Debug, label, "IdInstrucaoGeral: "+instrucoesMV.IdInstrucaoGeral)
 
+		if instrucoesMV.IdInstrucaoGeral == "6" {
+			err = procedureMV(instrucoesMV)
+			if err != nil {
+				utils.LogMonitor(utils.ErroIntegracao, label, "Erro ao executar procedure: "+err.Error())
+				erroProcedure += "Erro ao executar procedure para idInstrucao: " + instrucoesMV.IdInstrucaoGeral + " - " + err.Error() + "\n"
+			}
+		} else {
+			instrucaoFleury += instrucoesMV.TextoInstrucao + "\n\n"
+		}
+
+		// err = procedureMV(instrucoesMV)
+		// if err != nil {
+		// 	utils.LogMonitor(utils.ErroIntegracao, label, "Erro ao executar procedure: "+err.Error())
+		// 	erroProcedure += "Erro ao executar procedure para idInstrucao: " + instrucoesMV.IdInstrucaoGeral + " - " + err.Error() + "\n"
+		// }
+	}
+	if instrucaoFleury != "" {
+		instrucoesMV.TextoInstrucao = instrucaoFleury
+		instrucoesMV.IdInstrucaoGeral = "9"
 		err = procedureMV(instrucoesMV)
 		if err != nil {
 			utils.LogMonitor(utils.ErroIntegracao, label, "Erro ao executar procedure: "+err.Error())

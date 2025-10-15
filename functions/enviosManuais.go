@@ -95,7 +95,7 @@ func ProdutosFleury() gin.HandlerFunc {
 			// }
 			//continue
 		}
-		erroProcedure := buscaProcessaInstrucao(depara.CD_DEPARA_INTEGRA, accessToken)
+		erroProcedure := buscaProcessaInstrucao(produto, depara.CD_DEPARA_INTEGRA, accessToken)
 
 		if erroProcedure != "" {
 			utils.LogMonitor(utils.ErroFleury, label, "Erro ao processar instrucao: "+erroProcedure)
